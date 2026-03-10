@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PartnerStack Affiliate Analysis — March 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0f172a;--navy2:#1e293b;--blue:#3b82f6;--blue-dark:#2563eb;
+    --green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+    --gray:#64748b;--gray-light:#e2e8f0;--white:#fff;--bg:#f1f5f9;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+
+  /* HEADER */
+  .header{background:var(--navy);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.4)}
+  .header-brand{display:flex;align-items:center;gap:12px}
+  .close-logo{background:var(--blue);color:#fff;font-weight:900;font-size:14px;padding:4px 10px;border-radius:6px;letter-spacing:.5px}
+  .header-title{font-size:15px;color:#94a3b8}
+  .header-date{font-size:12px;color:#475569;background:#1e293b;padding:4px 12px;border-radius:20px}
+
+  /* MAIN */
+  .main{max-width:1200px;margin:0 auto;padding:32px 24px 60px}
+
+  /* KPI STRIP */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+  .kpi-card{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,0,0,.06);border-top:4px solid var(--c,var(--blue))}
+  .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:6px}
+  .kpi-value{font-size:28px;font-weight:900;color:var(--navy);line-height:1}
+  .kpi-sub{font-size:12px;color:var(--gray);margin-top:4px}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;background:#fff;padding:6px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:24px;flex-wrap:wrap}
+  .tab{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--gray);background:transparent;transition:all .2s;white-space:nowrap}
+  .tab.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.4)}
+  .tab:hover:not(.active){background:var(--bg);color:var(--navy)}
+
+  /* PANELS */
+  .panel{display:none}.panel.active{display:block}
+
+  /* SECTION HEADER */
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  .section-title{font-size:18px;font-weight:800;color:var(--navy)}
+  .section-sub{font-size:13px;color:var(--gray);margin-top:2px}
+
+  /* SEARCH / FILTER BAR */
+  .filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .search-box{padding:8px 14px;border:2px solid var(--gray-light);border-radius:8px;font-size:13px;width:240px;outline:none;transition:border-color .2s}
+  .search-box:focus{border-color:var(--blue)}
+  .sort-select{padding:8px 12px;border:2px solid var(--gray-light);border-radius:8px;font-size:13px;outline:none;cursor:pointer;background:#fff;transition:border-color .2s}
+  .sort-select:focus{border-color:var(--blue)}
+  .count-badge{font-size:12px;color:var(--gray);background:var(--bg);padding:4px 10px;border-radius:20px}
+
+  /* TABLE */
+  .table-wrap{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{background:var(--navy);color:#fff;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;white-space:nowrap;user-select:none}
+  thead th:hover{background:#1e293b}
+  thead th .sort-icon{margin-left:4px;opacity:.5}
+  thead th.sorted .sort-icon{opacity:1}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--gray-light);color:#334155;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:#f8fafc}
+  .rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:800;background:var(--bg);color:var(--gray)}
+  .rank-badge.top3{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
+  .rev-bar{height:6px;background:var(--gray-light);border-radius:3px;margin-top:4px;min-width:80px}
+  .rev-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--green))}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .tag-green{background:#ecfdf5;color:#059669}
+  .tag-orange{background:#fffbeb;color:#d97706}
+  .tag-red{background:#fef2f2;color:#dc2626}
+  .tag-blue{background:#eff6ff;color:#1d4ed8}
+  .tag-purple{background:#f5f3ff;color:#7c3aed}
+  .no-results{text-align:center;padding:40px;color:var(--gray);font-size:14px}
+
+  /* CHARTS */
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+  .chart-card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .chart-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:16px}
+  .chart-wrap{position:relative;height:260px}
+
+  /* INSIGHTS */
+  .insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:28px}
+  .insight-card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.06);border-left:4px solid var(--c,var(--blue))}
+  .insight-icon{font-size:28px;margin-bottom:10px}
+  .insight-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:8px}
+  .insight-body{font-size:13px;color:#475569;line-height:1.6}
+  .insight-action{margin-top:14px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:12px;font-weight:600;color:var(--navy)}
+  .insight-action span{color:var(--blue)}
+
+  /* WATCHLIST */
+  .watchlist{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:20px}
+  .watchlist-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .watchlist-title{font-size:15px;font-weight:800;color:var(--navy)}
+  .watchlist-badge{background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+  .watch-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-light);flex-wrap:wrap;gap:8px}
+  .watch-row:last-child{border-bottom:none}
+  .watch-name{font-weight:700;font-size:14px;color:var(--navy)}
+  .watch-email{font-size:12px;color:var(--gray)}
+  .watch-stats{display:flex;gap:16px}
+  .watch-stat{text-align:center}
+  .watch-stat-val{font-size:16px;font-weight:800;color:var(--navy)}
+  .watch-stat-label{font-size:11px;color:var(--gray)}
+
+  /* SEGMENT DONUT */
+  .segment-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+  .segment-card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .segment-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-light)}
+  .segment-row:last-child{border-bottom:none}
+  .segment-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+  .segment-label{font-size:13px;color:#334155;flex:1}
+  .segment-count{font-weight:700;font-size:13px;color:var(--navy)}
+  .segment-pct{font-size:12px;color:var(--gray);width:40px;text-align:right}
+
+  .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s}
+  .pill.active{border-color:var(--blue);background:#eff6ff;color:var(--blue-dark)}
+  .pill:not(.active){background:var(--bg);color:var(--gray)}
+  .pill:hover:not(.active){background:var(--gray-light)}
+
+  @media(max-width:768px){
+    .charts-grid,.segment-wrap{grid-template-columns:1fr}
+    .header{padding:14px 16px}
+    .main{padding:20px 16px 40px}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <span class="close-logo">CLOSE</span>
+    <span class="header-title">PartnerStack Affiliate Analysis</span>
+  </div>
+  <span class="header-date">March 10, 2026 · 4,326 affiliates</span>
+</div>
+
+<div class="main">
+
+  <!-- KPI STRIP -->
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--c:#3b82f6">
+      <div class="kpi-label">Total Affiliates</div>
+      <div class="kpi-value">4,326</div>
+      <div class="kpi-sub">95.5% approved</div>
+    </div>
+    <div class="kpi-card" style="--c:#10b981">
+      <div class="kpi-label">Revenue Attributed</div>
+      <div class="kpi-value">$2.56M</div>
+      <div class="kpi-sub">All-time total</div>
+    </div>
+    <div class="kpi-card" style="--c:#8b5cf6">
+      <div class="kpi-label">Customers Generated</div>
+      <div class="kpi-value">6,454</div>
+      <div class="kpi-sub">Via partner links</div>
+    </div>
+    <div class="kpi-card" style="--c:#f59e0b">
+      <div class="kpi-label">Commission Paid</div>
+      <div class="kpi-value">$461K</div>
+      <div class="kpi-sub">18.1% of revenue</div>
+    </div>
+    <div class="kpi-card" style="--c:#ef4444">
+      <div class="kpi-label">Link Clicks</div>
+      <div class="kpi-value">842K</div>
+      <div class="kpi-sub">0.77% click-to-customer</div>
+    </div>
+    <div class="kpi-card" style="--c:#0ea5e9">
+      <div class="kpi-label">Active Partners</div>
+      <div class="kpi-value">426</div>
+      <div class="kpi-sub">9.8% activation rate</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">📊 Overview</button>
+    <button class="tab" onclick="switchTab('customers')">👥 Top by Customers</button>
+    <button class="tab" onclick="switchTab('revenue')">💰 Top by Revenue</button>
+    <button class="tab" onclick="switchTab('warmleads')">🔥 Warm Leads</button>
+    <button class="tab" onclick="switchTab('insights')">💡 Insights & Actions</button>
+  </div>
+
+  <!-- ══ OVERVIEW ══ -->
+  <div id="panel-overview" class="panel active">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Revenue — Top 10 Partners</div>
+        <div class="chart-wrap"><canvas id="chartRevenue"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Customers — Top 10 Partners</div>
+        <div class="chart-wrap"><canvas id="chartCustomers"></canvas></div>
+      </div>
+    </div>
+
+    <div class="segment-wrap">
+      <div class="segment-card">
+        <div class="chart-title">Activity Breakdown</div>
+        <div class="chart-wrap"><canvas id="chartActivity"></canvas></div>
+      </div>
+      <div class="segment-card">
+        <div class="chart-title">Approval Status</div>
+        <div style="margin-bottom:16px">
+          <div class="segment-row">
+            <div class="segment-dot" style="background:#10b981"></div>
+            <div class="segment-label">Approved</div>
+            <div class="segment-count">4,132</div>
+            <div class="segment-pct">95.5%</div>
+          </div>
+          <div class="segment-row">
+            <div class="segment-dot" style="background:#ef4444"></div>
+            <div class="segment-label">Declined</div>
+            <div class="segment-count">189</div>
+            <div class="segment-pct">4.4%</div>
+          </div>
+          <div class="segment-row">
+            <div class="segment-dot" style="background:#f59e0b"></div>
+            <div class="segment-label">Pending</div>
+            <div class="segment-count">5</div>
+            <div class="segment-pct">0.1%</div>
+          </div>
+        </div>
+        <div class="chart-title" style="margin-top:20px">Activation Breakdown</div>
+        <div class="segment-row">
+          <div class="segment-dot" style="background:#3b82f6"></div>
+          <div class="segment-label">Active (1+ customers)</div>
+          <div class="segment-count">426</div>
+          <div class="segment-pct">9.8%</div>
+        </div>
+        <div class="segment-row">
+          <div class="segment-dot" style="background:#f59e0b"></div>
+          <div class="segment-label">Clicks, no customers</div>
+          <div class="segment-count">698</div>
+          <div class="segment-pct">16.1%</div>
+        </div>
+        <div class="segment-row">
+          <div class="segment-dot" style="background:#e2e8f0"></div>
+          <div class="segment-label">Zero activity</div>
+          <div class="segment-count">3,202</div>
+          <div class="segment-pct">74.0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TOP BY CUSTOMERS ══ -->
+  <div id="panel-customers" class="panel">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Top 20 Partners by Customer Count</div>
+        <div class="section-sub">All-time customers generated via PartnerStack links</div>
+      </div>
+      <div class="filter-bar">
+        <input class="search-box" type="text" placeholder="Search partner…" oninput="filterTable('tbl-customers', this.value)" />
+        <select class="sort-select" onchange="sortTable('tbl-customers', this.value)">
+          <option value="customers-desc">Customers ↓</option>
+          <option value="customers-asc">Customers ↑</option>
+          <option value="revenue-desc">Revenue ↓</option>
+          <option value="clicks-desc">Clicks ↓</option>
+          <option value="name-asc">Name A–Z</option>
+        </select>
+        <span class="count-badge" id="count-customers">20 partners</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-customers">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th onclick="sortTable('tbl-customers','name-asc')">Partner <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('tbl-customers','customers-desc')">Customers <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('tbl-customers','revenue-desc')">Revenue <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('tbl-customers','clicks-desc')">Clicks <span class="sort-icon">↕</span></th>
+            <th>Rev/Customer</th>
+            <th>Signal</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-customers"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TOP BY REVENUE ══ -->
+  <div id="panel-revenue" class="panel">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Top 10 Partners by Revenue</div>
+        <div class="section-sub">Highest revenue-generating affiliates — sorted by total attributed revenue</div>
+      </div>
+      <div class="filter-bar">
+        <input class="search-box" type="text" placeholder="Search partner…" oninput="filterTable('tbl-revenue', this.value)" />
+        <select class="sort-select" onchange="sortTable('tbl-revenue', this.value)">
+          <option value="revenue-desc">Revenue ↓</option>
+          <option value="revenue-asc">Revenue ↑</option>
+          <option value="customers-desc">Customers ↓</option>
+          <option value="clicks-desc">Clicks ↓</option>
+        </select>
+        <span class="count-badge" id="count-revenue">10 partners</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-revenue">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Partner</th>
+            <th onclick="sortTable('tbl-revenue','revenue-desc')">Revenue <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('tbl-revenue','customers-desc')">Customers <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('tbl-revenue','clicks-desc')">Clicks <span class="sort-icon">↕</span></th>
+            <th>Rev/Customer</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-revenue"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ WARM LEADS ══ -->
+  <div id="panel-warmleads" class="panel">
+    <div class="section-head">
+      <div>
+        <div class="section-title">🔥 Top 10 Warm Leads</div>
+        <div class="section-sub">Partners with high clicks but zero customers — highest-ROI re-engagement targets</div>
+      </div>
+      <div class="filter-bar">
+        <input class="search-box" type="text" placeholder="Search partner…" oninput="filterTable('tbl-warm', this.value)" />
+        <span class="count-badge" id="count-warm">10 partners</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-warm">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Partner</th>
+            <th>Email</th>
+            <th onclick="sortTable('tbl-warm','clicks-desc')">Link Clicks <span class="sort-icon">↕</span></th>
+            <th>Priority</th>
+            <th>Suggested Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-warm"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ INSIGHTS ══ -->
+  <div id="panel-insights" class="panel">
+    <div class="insights-grid">
+      <div class="insight-card" style="--c:#ef4444">
+        <div class="insight-icon">🚨</div>
+        <div class="insight-title">Activation Crisis</div>
+        <div class="insight-body">74% of affiliates (3,202 partners) have never generated a single click or customer. The program is over-indexed on recruitment and critically under-indexed on activation.</div>
+        <div class="insight-action"><span>→ Action:</span> Launch a targeted 3-email reactivation sequence to dormant partners with a quick-start guide and a $100 bonus for first conversion within 60 days.</div>
+      </div>
+      <div class="insight-card" style="--c:#f59e0b">
+        <div class="insight-icon">💎</div>
+        <div class="insight-title">High-Value Hidden Gems</div>
+        <div class="insight-body">Jay Scavone (22 customers → $135K), Brooks Van Norman (12 customers → $117K), and Mark Miale (7 customers → $112K) have extremely low clicks but huge revenue — they're sending enterprise deals via direct offline referrals.</div>
+        <div class="insight-action"><span>→ Action:</span> White-glove outreach immediately. Schedule a 1:1 with each. Offer co-sell support, priority status, and a dedicated Partner Manager.</div>
+      </div>
+      <div class="insight-card" style="--c:#3b82f6">
+        <div class="insight-icon">🔥</div>
+        <div class="insight-title">Warm Lead Goldmine</div>
+        <div class="insight-body">698 partners have driven clicks but zero customers. Stefania Niciforo alone has 29,452 clicks — a highly engaged audience that just hasn't converted yet. This is the highest-ROI re-engagement cohort.</div>
+        <div class="insight-action"><span>→ Action:</span> Reach out to top 10 warm leads with conversion optimization support — custom landing pages, co-branded content, or a trial incentive for their audience.</div>
+      </div>
+      <div class="insight-card" style="--c:#8b5cf6">
+        <div class="insight-icon">⚠️</div>
+        <div class="insight-title">Revenue Concentration Risk</div>
+        <div class="insight-body">The top 10 partners by revenue account for a disproportionate share of $2.56M total. Losing 1–2 of these relationships (especially Alexander Daskaloff at $256K or Will Weatherly at $186K) would significantly impact program performance.</div>
+        <div class="insight-action"><span>→ Action:</span> Establish quarterly check-ins for all top-10 revenue partners. Offer annual retention incentives and ensure they have direct executive access.</div>
+      </div>
+      <div class="insight-card" style="--c:#10b981">
+        <div class="insight-icon">📈</div>
+        <div class="insight-title">Quality vs. Volume Gap</div>
+        <div class="insight-body">David Heimlich has 167 customers but only $108 in revenue — something is wrong (likely free trials, low-tier plans, or data issue). Meanwhile, Mark Miale has 7 customers and $112K. Revenue per customer varies wildly across the program.</div>
+        <div class="insight-action"><span>→ Action:</span> Audit outliers for data integrity. Flag partners with >50 customers and <$500 revenue for review — they may be driving trial inflation, not real conversions.</div>
+      </div>
+      <div class="insight-card" style="--c:#0ea5e9">
+        <div class="insight-icon">🎯</div>
+        <div class="insight-title">Click Efficiency Leaders</div>
+        <div class="insight-body">My Teresa (245 customers, only 530 clicks) and Hinh Mx (225 customers, 411 clicks) are converting at extraordinary rates — suggesting a trusted, high-intent audience. These partners punch far above their click volume.</div>
+        <div class="insight-action"><span>→ Action:</span> Study what these partners are doing differently. Interview them, replicate their approach in partner enablement materials, and increase their support tier.</div>
+      </div>
+    </div>
+
+    <!-- WATCH LIST -->
+    <div class="watchlist">
+      <div class="watchlist-header">
+        <div class="watchlist-title">🔴 Immediate Priority Watch List</div>
+        <span class="watchlist-badge">Act This Week</span>
+      </div>
+      <div class="watch-row">
+        <div><div class="watch-name">Jay Scavone</div><div class="watch-email">High-value direct referrer</div></div>
+        <div class="watch-stats">
+          <div class="watch-stat"><div class="watch-stat-val">22</div><div class="watch-stat-label">Customers</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">$135K</div><div class="watch-stat-label">Revenue</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">24</div><div class="watch-stat-label">Clicks</div></div>
+          <div class="watch-stat"><span class="tag tag-purple">$6,178/customer</span></div>
+        </div>
+      </div>
+      <div class="watch-row">
+        <div><div class="watch-name">Brooks Van Norman</div><div class="watch-email">Ultra-high ACV, 3 clicks only</div></div>
+        <div class="watch-stats">
+          <div class="watch-stat"><div class="watch-stat-val">12</div><div class="watch-stat-label">Customers</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">$117K</div><div class="watch-stat-label">Revenue</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">3</div><div class="watch-stat-label">Clicks</div></div>
+          <div class="watch-stat"><span class="tag tag-purple">$9,793/customer</span></div>
+        </div>
+      </div>
+      <div class="watch-row">
+        <div><div class="watch-name">Stefania Niciforo</div><div class="watch-email">stefania.niciforo@performyze.com</div></div>
+        <div class="watch-stats">
+          <div class="watch-stat"><div class="watch-stat-val">0</div><div class="watch-stat-label">Customers</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">$0</div><div class="watch-stat-label">Revenue</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">29,452</div><div class="watch-stat-label">Clicks</div></div>
+          <div class="watch-stat"><span class="tag tag-orange">Warm Lead #1</span></div>
+        </div>
+      </div>
+      <div class="watch-row">
+        <div><div class="watch-name">David Heimlich</div><div class="watch-email">dave@vendingvillage.com — data anomaly</div></div>
+        <div class="watch-stats">
+          <div class="watch-stat"><div class="watch-stat-val">167</div><div class="watch-stat-label">Customers</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">$108</div><div class="watch-stat-label">Revenue</div></div>
+          <div class="watch-stat"><div class="watch-stat-val">377</div><div class="watch-stat-label">Clicks</div></div>
+          <div class="watch-stat"><span class="tag tag-red">$0.65/customer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════
+const topCustomers = [
+  {name:'Sergei Platunov',email:'piternuraket12@gmail.com',customers:456,revenue:69880,clicks:17408},
+  {name:'Victoria Lukianenko',email:'partnerstack@takeads.com',customers:262,revenue:122789,clicks:34512},
+  {name:'My Teresa',email:'huyenmi0708@gmail.com',customers:245,revenue:41136,clicks:530},
+  {name:'Hinh Mx',email:'yeuvothangban1102@gmail.com',customers:225,revenue:70450,clicks:411},
+  {name:'Alex Quigley',email:'alex@thumbwrite.com',customers:207,revenue:10643,clicks:30684},
+  {name:'Will Weatherly',email:'will@myreviewscollection.us',customers:201,revenue:186687,clicks:3039},
+  {name:'BloggingX ReachX',email:'bloggereachx@gmail.com',customers:196,revenue:15905,clicks:9808},
+  {name:'Jastej Choong',email:'jastej13@gmail.com',customers:178,revenue:98005,clicks:774},
+  {name:'USD Hinh',email:'hinhmai6789@gmail.com',customers:172,revenue:21233,clicks:436},
+  {name:'Alexander Daskaloff',email:'notifications@flexoffers.com',customers:171,revenue:256035,clicks:116403},
+  {name:'Richard Hinh',email:'thaovy191100@gmail.com',customers:168,revenue:41049,clicks:302},
+  {name:'David Heimlich',email:'dave@vendingvillage.com',customers:167,revenue:108,clicks:377},
+  {name:'Máté Gérecz',email:'gereczm@gmail.com',customers:145,revenue:20627,clicks:1},
+  {name:'Mildrid Waddy',email:'taiwaneseaardwolf@gmail.com',customers:126,revenue:1945,clicks:88},
+  {name:'Leanne Clark',email:'support@smartaiwriting.com',customers:114,revenue:14869,clicks:4927},
+  {name:'Nga Trần',email:'trannga160494@gmail.com',customers:109,revenue:1756,clicks:1964},
+  {name:'Joey Chu',email:'joeychumarketer@gmail.com',customers:100,revenue:54809,clicks:3532},
+  {name:'Yabku Pathak',email:'iyabku@gmail.com',customers:94,revenue:35451,clicks:5306},
+  {name:'Thao Nguyen Ngoc',email:'admin@couponproduct.com',customers:86,revenue:1334,clicks:3561},
+  {name:'Ken Nguyen',email:'masterlifeincome@gmail.com',customers:84,revenue:468,clicks:4},
+];
+
+const topRevenue = [
+  {name:'Alexander Daskaloff',customers:171,revenue:256035,clicks:116403},
+  {name:'Will Weatherly',customers:201,revenue:186687,clicks:3039},
+  {name:'Jay Scavone',customers:22,revenue:135923,clicks:24},
+  {name:'Victoria Lukianenko',customers:262,revenue:122789,clicks:34512},
+  {name:'Brooks Van Norman',customers:12,revenue:117513,clicks:3},
+  {name:'Mark Miale',customers:7,revenue:111996,clicks:4},
+  {name:'Jastej Choong',customers:178,revenue:98005,clicks:774},
+  {name:'Michael Dallas-Petersen',customers:5,revenue:95342,clicks:2579},
+  {name:'Hinh Mx',customers:225,revenue:70450,clicks:411},
+  {name:'Sergei Platunov',customers:456,revenue:69880,clicks:17408},
+];
+
+const warmLeads = [
+  {name:'Stefania Niciforo',email:'stefania.niciforo@performyze.com',clicks:29452},
+  {name:'Luis Estrella',email:'luis@theluisestrella.com',clicks:20840},
+  {name:'Steven Kim',email:'steven@christianpost.com',clicks:19456},
+  {name:'Matrix Thompson',email:'info@woahmedia.com',clicks:14472},
+  {name:'Ahmed Awad',email:'ahmed@pipelinewithahmed.com',clicks:7121},
+  {name:'Douglas Karr',email:'doug@dknewmedia.com',clicks:4526},
+  {name:'John Moore',email:'thecollaborator@trustenablement.com',clicks:4295},
+  {name:'Yevhen Derkach',email:'evgeny@ciframe.com',clicks:3807},
+  {name:'Johnny Rio Fultz',email:'johnny@rio3consulting.com',clicks:3193},
+  {name:'Bernardo Eiró',email:'bernardoeiro@gmail.com',clicks:3074},
+];
+
+// ═══════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+//  RENDER TABLES
+// ═══════════════════════════════════════
+const maxRev = Math.max(...topCustomers.map(d => d.revenue));
+
+function getSignal(d) {
+  const rpc = d.revenue / d.customers;
+  if (d.revenue < 200 && d.customers > 50) return '<span class="tag tag-red">⚠ Anomaly</span>';
+  if (rpc > 5000) return '<span class="tag tag-purple">💎 High ACV</span>';
+  if (d.clicks < 10 && d.customers > 50) return '<span class="tag tag-orange">Direct Ref</span>';
+  if (d.clicks > 20000) return '<span class="tag tag-blue">High Traffic</span>';
+  return '<span class="tag tag-green">Active</span>';
+}
+
+function renderCustomers(data) {
+  const tbody = document.getElementById('tbody-customers');
+  tbody.innerHTML = data.map((d, i) => `
+    <tr>
+      <td><span class="rank-badge ${i < 3 ? 'top3' : ''}">${i+1}</span></td>
+      <td><strong>${d.name}</strong><br><span style="font-size:11px;color:var(--gray)">${d.email}</span></td>
+      <td><strong>${d.customers.toLocaleString()}</strong></td>
+      <td>
+        <strong>$${d.revenue.toLocaleString()}</strong>
+        <div class="rev-bar"><div class="rev-fill" style="width:${Math.round(d.revenue/maxRev*100)}%"></div></div>
+      </td>
+      <td>${d.clicks.toLocaleString()}</td>
+      <td>$${Math.round(d.revenue/d.customers).toLocaleString()}</td>
+      <td>${getSignal(d)}</td>
+    </tr>`).join('');
+  document.getElementById('count-customers').textContent = data.length + ' partners';
+}
+
+const maxRevTop = Math.max(...topRevenue.map(d => d.revenue));
+function getType(d) {
+  if (d.clicks < 10) return '<span class="tag tag-purple">Direct Referrer</span>';
+  if (d.clicks > 10000) return '<span class="tag tag-blue">High Traffic</span>';
+  return '<span class="tag tag-green">Balanced</span>';
+}
+
+function renderRevenue(data) {
+  const tbody = document.getElementById('tbody-revenue');
+  tbody.innerHTML = data.map((d, i) => `
+    <tr>
+      <td><span class="rank-badge ${i < 3 ? 'top3' : ''}">${i+1}</span></td>
+      <td><strong>${d.name}</strong></td>
+      <td>
+        <strong>$${d.revenue.toLocaleString()}</strong>
+        <div class="rev-bar"><div class="rev-fill" style="width:${Math.round(d.revenue/maxRevTop*100)}%"></div></div>
+      </td>
+      <td>${d.customers.toLocaleString()}</td>
+      <td>${d.clicks.toLocaleString()}</td>
+      <td>$${Math.round(d.revenue/d.customers).toLocaleString()}</td>
+      <td>${getType(d)}</td>
+    </tr>`).join('');
+  document.getElementById('count-revenue').textContent = data.length + ' partners';
+}
+
+function getPriority(i) {
+  if (i === 0) return '<span class="tag tag-red">🔴 Critical</span>';
+  if (i < 3) return '<span class="tag tag-orange">🟠 High</span>';
+  return '<span class="tag tag-blue">🔵 Medium</span>';
+}
+
+function getAction(d) {
+  if (d.clicks > 20000) return 'Co-branded landing page + trial incentive';
+  if (d.clicks > 10000) return 'Personal outreach + conversion coaching';
+  return 'Email re-engagement + enablement kit';
+}
+
+function renderWarm(data) {
+  const tbody = document.getElementById('tbody-warm');
+  tbody.innerHTML = data.map((d, i) => `
+    <tr>
+      <td><span class="rank-badge ${i < 3 ? 'top3' : ''}">${i+1}</span></td>
+      <td><strong>${d.name}</strong></td>
+      <td style="font-size:12px;color:var(--gray)">${d.email}</td>
+      <td><strong>${d.clicks.toLocaleString()}</strong></td>
+      <td>${getPriority(i)}</td>
+      <td style="font-size:12px;color:#475569">${getAction(d)}</td>
+    </tr>`).join('');
+  document.getElementById('count-warm').textContent = data.length + ' partners';
+}
+
+// ═══════════════════════════════════════
+//  FILTER & SORT
+// ═══════════════════════════════════════
+let currentData = { 'tbl-customers': [...topCustomers], 'tbl-revenue': [...topRevenue], 'tbl-warm': [...warmLeads] };
+
+function filterTable(tableId, query) {
+  const q = query.toLowerCase();
+  if (tableId === 'tbl-customers') {
+    const filtered = topCustomers.filter(d => d.name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q));
+    currentData[tableId] = filtered;
+    renderCustomers(filtered);
+  } else if (tableId === 'tbl-revenue') {
+    const filtered = topRevenue.filter(d => d.name.toLowerCase().includes(q));
+    currentData[tableId] = filtered;
+    renderRevenue(filtered);
+  } else if (tableId === 'tbl-warm') {
+    const filtered = warmLeads.filter(d => d.name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q));
+    currentData[tableId] = filtered;
+    renderWarm(filtered);
+  }
+}
+
+function sortTable(tableId, key) {
+  const sorters = {
+    'customers-desc': (a,b) => b.customers - a.customers,
+    'customers-asc': (a,b) => a.customers - b.customers,
+    'revenue-desc': (a,b) => b.revenue - a.revenue,
+    'revenue-asc': (a,b) => a.revenue - b.revenue,
+    'clicks-desc': (a,b) => b.clicks - a.clicks,
+    'name-asc': (a,b) => a.name.localeCompare(b.name),
+  };
+  const fn = sorters[key];
+  if (!fn) return;
+  if (tableId === 'tbl-customers') { renderCustomers([...topCustomers].sort(fn)); }
+  else if (tableId === 'tbl-revenue') { renderRevenue([...topRevenue].sort(fn)); }
+  else if (tableId === 'tbl-warm') { renderWarm([...warmLeads].sort((a,b) => b.clicks - a.clicks)); }
+}
+
+// ═══════════════════════════════════════
+//  CHARTS
+// ═══════════════════════════════════════
+function initCharts() {
+  const colors = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#0ea5e9','#ec4899','#14b8a6','#f97316','#6366f1'];
+
+  // Revenue chart
+  new Chart(document.getElementById('chartRevenue'), {
+    type: 'bar',
+    data: {
+      labels: topRevenue.map(d => d.name.split(' ')[0] + ' ' + (d.name.split(' ')[1]?.[0] || '') + '.'),
+      datasets: [{ data: topRevenue.map(d => d.revenue), backgroundColor: colors, borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString() } } },
+      scales: { y: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' }, grid: { color: '#f1f5f9' } }, x: { ticks: { font: { size: 10 } } } }
+    }
+  });
+
+  // Customers chart
+  new Chart(document.getElementById('chartCustomers'), {
+    type: 'bar',
+    data: {
+      labels: topCustomers.slice(0,10).map(d => d.name.split(' ')[0]),
+      datasets: [{ data: topCustomers.slice(0,10).map(d => d.customers), backgroundColor: colors, borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { grid: { color: '#f1f5f9' } }, x: { ticks: { font: { size: 10 } } } }
+    }
+  });
+
+  // Activity donut
+  new Chart(document.getElementById('chartActivity'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Active (1+ customers)', 'Clicks, no customers', 'Zero activity'],
+      datasets: [{ data: [426, 698, 3202], backgroundColor: ['#3b82f6','#f59e0b','#e2e8f0'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16 } } },
+      cutout: '65%'
+    }
+  });
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+renderCustomers(topCustomers);
+renderRevenue(topRevenue);
+renderWarm(warmLeads);
+initCharts();
+</script>
+</body>
+</html>
