@@ -135,7 +135,7 @@
     <span class="close-logo">CLOSE</span>
     <span class="header-title">PartnerStack Affiliate Analysis</span>
   </div>
-  <span class="header-date">March 10, 2026 · 4,326 affiliates</span>
+  <span class="header-date" id="headerDate">March 10, 2026 · 4,326 affiliates</span>
 </div>
 
 <div class="main">
@@ -144,33 +144,33 @@
   <div class="kpi-grid">
     <div class="kpi-card" style="--c:#3b82f6">
       <div class="kpi-label">Total Affiliates</div>
-      <div class="kpi-value">4,326</div>
-      <div class="kpi-sub">95.5% approved</div>
+      <div class="kpi-value" id="kpi-partners">4,326</div>
+      <div class="kpi-sub" id="kpi-partners-sub">95.5% approved</div>
     </div>
     <div class="kpi-card" style="--c:#10b981">
       <div class="kpi-label">Revenue Attributed</div>
-      <div class="kpi-value">$2.56M</div>
+      <div class="kpi-value" id="kpi-revenue">$2.56M</div>
       <div class="kpi-sub">All-time total</div>
     </div>
     <div class="kpi-card" style="--c:#8b5cf6">
       <div class="kpi-label">Customers Generated</div>
-      <div class="kpi-value">6,454</div>
+      <div class="kpi-value" id="kpi-customers">6,454</div>
       <div class="kpi-sub">Via partner links</div>
     </div>
     <div class="kpi-card" style="--c:#f59e0b">
       <div class="kpi-label">Commission Paid</div>
-      <div class="kpi-value">$461K</div>
-      <div class="kpi-sub">18.1% of revenue</div>
+      <div class="kpi-value" id="kpi-commission">$461K</div>
+      <div class="kpi-sub" id="kpi-commission-sub">18.1% of revenue</div>
     </div>
     <div class="kpi-card" style="--c:#ef4444">
       <div class="kpi-label">Link Clicks</div>
-      <div class="kpi-value">842K</div>
-      <div class="kpi-sub">0.77% click-to-customer</div>
+      <div class="kpi-value" id="kpi-clicks">842K</div>
+      <div class="kpi-sub" id="kpi-clicks-sub">0.77% click-to-customer</div>
     </div>
     <div class="kpi-card" style="--c:#0ea5e9">
       <div class="kpi-label">Active Partners</div>
-      <div class="kpi-value">426</div>
-      <div class="kpi-sub">9.8% activation rate</div>
+      <div class="kpi-value" id="kpi-active">426</div>
+      <div class="kpi-sub" id="kpi-active-sub">9.8% activation rate</div>
     </div>
   </div>
 
@@ -670,12 +670,37 @@ function initCharts() {
 }
 
 // ═══════════════════════════════════════
-//  INIT
+//  INIT — loads data.json, falls back to hardcoded
 // ═══════════════════════════════════════
-renderCustomers(topCustomers);
-renderRevenue(topRevenue);
-renderWarm(warmLeads);
-initCharts();
+function applyData(d) {
+  const t = d.totals, a = d.activity;
+  document.getElementById('headerDate').textContent =
+    d.lastUpdated + ' · ' + t.partners.toLocaleString() + ' affiliates';
+  document.getElementById('kpi-partners').textContent    = t.partners.toLocaleString();
+  document.getElementById('kpi-partners-sub').textContent = ((t.approved/t.partners)*100).toFixed(1) + '% approved';
+  document.getElementById('kpi-revenue').textContent     = '$' + (t.revenue/1e6).toFixed(2) + 'M';
+  document.getElementById('kpi-customers').textContent   = t.customers.toLocaleString();
+  document.getElementById('kpi-commission').textContent  = '$' + Math.round(t.commission/1000) + 'K';
+  document.getElementById('kpi-commission-sub').textContent = ((t.commission/t.revenue)*100).toFixed(1) + '% of revenue';
+  document.getElementById('kpi-clicks').textContent      = Math.round(t.clicks/1000) + 'K';
+  document.getElementById('kpi-clicks-sub').textContent  = ((t.customers/t.clicks)*100).toFixed(2) + '% click-to-customer';
+  document.getElementById('kpi-active').textContent      = t.active.toLocaleString();
+  document.getElementById('kpi-active-sub').textContent  = ((t.active/t.partners)*100).toFixed(1) + '% activation rate';
+  topCustomers.splice(0, Infinity, ...d.topCustomers);
+  topRevenue.splice(0, Infinity, ...d.topRevenue);
+  warmLeads.splice(0, Infinity, ...d.warmLeads);
+}
+
+(async function init() {
+  try {
+    const r = await fetch('./data.json?_=' + Date.now());
+    if (r.ok) applyData(await r.json());
+  } catch(e) { /* use hardcoded fallback */ }
+  renderCustomers(topCustomers);
+  renderRevenue(topRevenue);
+  renderWarm(warmLeads);
+  initCharts();
+})();
 </script>
 </body>
 </html>
