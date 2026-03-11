@@ -25,7 +25,23 @@
   .main{max-width:1200px;margin:0 auto;padding:32px 24px 60px}
 
   /* KPI STRIP */
-  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+  /* DATE FILTER BAR */
+  .date-bar{background:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .date-bar label{font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}
+  .date-select{padding:7px 12px;border:2px solid var(--gray-light);border-radius:8px;font-size:13px;font-weight:600;color:var(--navy);background:#fff;cursor:pointer;outline:none;transition:border-color .2s}
+  .date-select:focus{border-color:var(--blue)}
+  .date-arrow{color:var(--gray);font-size:14px}
+  .date-apply{padding:7px 18px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s}
+  .date-apply:hover{background:var(--blue-dark)}
+  .date-apply:disabled{background:var(--gray-light);color:var(--gray);cursor:default}
+  .date-mode-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .date-mode-single{background:#eff6ff;color:#1d4ed8}
+  .date-mode-range{background:#ecfdf5;color:#059669}
+  .delta-positive{color:#059669;font-weight:700;font-size:11px}
+  .delta-negative{color:#ef4444;font-weight:700;font-size:11px}
+  .delta-neutral{color:var(--gray);font-size:11px}
+  .kpi-delta{font-size:11px;margin-top:3px}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
   .kpi-card{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,0,0,.06);border-top:4px solid var(--c,var(--blue))}
   .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:6px}
   .kpi-value{font-size:28px;font-weight:900;color:var(--navy);line-height:1}
@@ -139,6 +155,16 @@
 </div>
 
 <div class="main">
+
+  <!-- DATE FILTER BAR -->
+  <div class="date-bar">
+    <label>Date Range</label>
+    <select class="date-select" id="dateFrom" onchange="onDateChange()"></select>
+    <span class="date-arrow">→</span>
+    <select class="date-select" id="dateTo" onchange="onDateChange()"></select>
+    <button class="date-apply" id="dateApplyBtn" onclick="applyDateRange()">Apply</button>
+    <span class="date-mode-badge date-mode-single" id="dateModeLabel">Single snapshot</span>
+  </div>
 
   <!-- KPI STRIP -->
   <div class="kpi-grid">
@@ -275,7 +301,7 @@
             <th onclick="sortTable('tbl-customers','revenue-desc')">Revenue <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('tbl-customers','clicks-desc')">Clicks <span class="sort-icon">↕</span></th>
             <th>Rev/Customer</th>
-            <th>Signal</th>
+            <th id="col-signal-c">Signal</th>
           </tr>
         </thead>
         <tbody id="tbody-customers"></tbody>
@@ -623,15 +649,22 @@ function sortTable(tableId, key) {
 // ═══════════════════════════════════════
 //  CHARTS
 // ═══════════════════════════════════════
-function initCharts() {
+let _chartRevenue, _chartCustomers, _chartActivity;
+function initCharts(snap) {
+  const tC = snap ? snap.topCustomers : topCustomers;
+  const tR = snap ? snap.topRevenue   : topRevenue;
+  const act = snap ? snap.activity    : {active:426,warm:698,dormant:3202};
   const colors = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#0ea5e9','#ec4899','#14b8a6','#f97316','#6366f1'];
+  if (_chartRevenue)  { _chartRevenue.destroy(); }
+  if (_chartCustomers){ _chartCustomers.destroy(); }
+  if (_chartActivity) { _chartActivity.destroy(); }
 
   // Revenue chart
-  new Chart(document.getElementById('chartRevenue'), {
+  _chartRevenue = new Chart(document.getElementById('chartRevenue'), {
     type: 'bar',
     data: {
-      labels: topRevenue.map(d => d.name.split(' ')[0] + ' ' + (d.name.split(' ')[1]?.[0] || '') + '.'),
-      datasets: [{ data: topRevenue.map(d => d.revenue), backgroundColor: colors, borderRadius: 6 }]
+      labels: tR.map(d => d.name.split(' ')[0] + ' ' + (d.name.split(' ')[1]?.[0] || '') + '.'),
+      datasets: [{ data: tR.map(d => d.revenue), backgroundColor: colors, borderRadius: 6 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -641,11 +674,11 @@ function initCharts() {
   });
 
   // Customers chart
-  new Chart(document.getElementById('chartCustomers'), {
+  _chartCustomers = new Chart(document.getElementById('chartCustomers'), {
     type: 'bar',
     data: {
-      labels: topCustomers.slice(0,10).map(d => d.name.split(' ')[0]),
-      datasets: [{ data: topCustomers.slice(0,10).map(d => d.customers), backgroundColor: colors, borderRadius: 6 }]
+      labels: tC.slice(0,10).map(d => d.name.split(' ')[0]),
+      datasets: [{ data: tC.slice(0,10).map(d => d.customers), backgroundColor: colors, borderRadius: 6 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -655,11 +688,11 @@ function initCharts() {
   });
 
   // Activity donut
-  new Chart(document.getElementById('chartActivity'), {
+  _chartActivity = new Chart(document.getElementById('chartActivity'), {
     type: 'doughnut',
     data: {
       labels: ['Active (1+ customers)', 'Clicks, no customers', 'Zero activity'],
-      datasets: [{ data: [426, 698, 3202], backgroundColor: ['#3b82f6','#f59e0b','#e2e8f0'], borderWidth: 0, hoverOffset: 6 }]
+      datasets: [{ data: [act.active, act.warm, act.dormant], backgroundColor: ['#3b82f6','#f59e0b','#e2e8f0'], borderWidth: 0, hoverOffset: 6 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -670,32 +703,170 @@ function initCharts() {
 }
 
 // ═══════════════════════════════════════
-//  INIT — loads data.json, falls back to hardcoded
+//  DATE RANGE STATE
 // ═══════════════════════════════════════
-function applyData(d) {
-  const t = d.totals, a = d.activity;
-  document.getElementById('headerDate').textContent =
-    d.lastUpdated + ' · ' + t.partners.toLocaleString() + ' affiliates';
-  document.getElementById('kpi-partners').textContent    = t.partners.toLocaleString();
-  document.getElementById('kpi-partners-sub').textContent = ((t.approved/t.partners)*100).toFixed(1) + '% approved';
-  document.getElementById('kpi-revenue').textContent     = '$' + (t.revenue/1e6).toFixed(2) + 'M';
-  document.getElementById('kpi-customers').textContent   = t.customers.toLocaleString();
-  document.getElementById('kpi-commission').textContent  = '$' + Math.round(t.commission/1000) + 'K';
-  document.getElementById('kpi-commission-sub').textContent = ((t.commission/t.revenue)*100).toFixed(1) + '% of revenue';
-  document.getElementById('kpi-clicks').textContent      = Math.round(t.clicks/1000) + 'K';
-  document.getElementById('kpi-clicks-sub').textContent  = ((t.customers/t.clicks)*100).toFixed(2) + '% click-to-customer';
-  document.getElementById('kpi-active').textContent      = t.active.toLocaleString();
-  document.getElementById('kpi-active-sub').textContent  = ((t.active/t.partners)*100).toFixed(1) + '% activation rate';
-  topCustomers.splice(0, Infinity, ...d.topCustomers);
-  topRevenue.splice(0, Infinity, ...d.topRevenue);
-  warmLeads.splice(0, Infinity, ...d.warmLeads);
+let FULL_DATA   = null;   // full data.json object
+let SNAP_END    = null;   // active end snapshot
+let SNAP_START  = null;   // active start snapshot (for deltas), null = single date
+
+function fmt(n, type) {
+  if (type === 'M') return '$' + (n/1e6).toFixed(2) + 'M';
+  if (type === 'K') return '$' + Math.round(n/1000) + 'K';
+  if (type === 'clicks') return Math.round(n/1000) + 'K';
+  return n.toLocaleString();
+}
+function deltaHtml(val, prev, type) {
+  if (prev === undefined || prev === null) return '';
+  const d = val - prev;
+  if (d === 0) return '<div class="kpi-delta delta-neutral">— no change</div>';
+  const sign  = d > 0 ? '+' : '';
+  const cls   = d > 0 ? 'delta-positive' : 'delta-negative';
+  const arrow = d > 0 ? '▲' : '▼';
+  const disp  = type === 'M' ? '$' + (Math.abs(d)/1e6).toFixed(2) + 'M'
+              : type === 'K' ? '$' + Math.round(Math.abs(d)/1000) + 'K'
+              : type === 'clicks' ? Math.round(Math.abs(d)/1000) + 'K'
+              : Math.abs(d).toLocaleString();
+  return `<div class="kpi-delta ${cls}">${arrow} ${sign}${disp}</div>`;
 }
 
+function applySnap(snap, prevSnap) {
+  const t = snap.totals, a = snap.activity;
+  const pt = prevSnap ? prevSnap.totals : null;
+
+  document.getElementById('kpi-partners').innerHTML    = t.partners.toLocaleString() + deltaHtml(t.partners, pt?.partners, '');
+  document.getElementById('kpi-partners-sub').textContent = ((t.approved/t.partners)*100).toFixed(1) + '% approved';
+  document.getElementById('kpi-revenue').innerHTML     = fmt(t.revenue,'M') + deltaHtml(t.revenue, pt?.revenue, 'M');
+  document.getElementById('kpi-customers').innerHTML   = t.customers.toLocaleString() + deltaHtml(t.customers, pt?.customers, '');
+  document.getElementById('kpi-commission').innerHTML  = fmt(t.commission,'K') + deltaHtml(t.commission, pt?.commission, 'K');
+  document.getElementById('kpi-commission-sub').textContent = ((t.commission/t.revenue)*100).toFixed(1) + '% of revenue';
+  document.getElementById('kpi-clicks').innerHTML      = fmt(t.clicks,'clicks') + deltaHtml(t.clicks, pt?.clicks, 'clicks');
+  document.getElementById('kpi-clicks-sub').textContent    = ((t.customers/t.clicks)*100).toFixed(2) + '% click-to-customer';
+  document.getElementById('kpi-active').innerHTML      = t.active.toLocaleString() + deltaHtml(t.active, pt?.active, '');
+  document.getElementById('kpi-active-sub').textContent    = ((t.active/t.partners)*100).toFixed(1) + '% activation rate';
+
+  // Inject delta into partner rows if comparing
+  topCustomers.splice(0, Infinity, ...snap.topCustomers);
+  topRevenue.splice(0, Infinity,   ...snap.topRevenue);
+  warmLeads.splice(0, Infinity,    ...snap.warmLeads);
+  SNAP_START = prevSnap || null;
+
+  renderCustomers(topCustomers);
+  renderRevenue(topRevenue);
+  renderWarm(warmLeads);
+}
+
+// ── OVERRIDE render functions to show deltas ──
+const _origRenderCustomers = renderCustomers;
+const _origRenderRevenue   = renderRevenue;
+
+function renderCustomers(data) {
+  const prevById = SNAP_START ? SNAP_START.byId : null;
+  const maxRev = Math.max(...data.map(d => d.revenue));
+  document.getElementById('tbody-customers').innerHTML = data.map((d, i) => {
+    const prev = prevById ? prevById[d.id] : null;
+    const dCust = prev ? d.customers - prev.c : null;
+    const dRev  = prev ? d.revenue   - prev.r : null;
+    const revDelta = dRev !== null ? (dRev >= 0 ? `<span class="delta-positive">▲ $${Math.round(Math.abs(dRev)).toLocaleString()}</span>` : `<span class="delta-negative">▼ $${Math.round(Math.abs(dRev)).toLocaleString()}</span>`) : '';
+    const custDelta = dCust !== null ? (dCust >= 0 ? `<span class="delta-positive">▲${dCust}</span>` : `<span class="delta-negative">▼${Math.abs(dCust)}</span>`) : '';
+    return `<tr>
+      <td><span class="rank-badge ${i < 3 ? 'top3' : ''}">${i+1}</span></td>
+      <td><strong>${d.name}</strong><br><span style="font-size:11px;color:var(--gray)">${d.email}</span></td>
+      <td><strong>${d.customers.toLocaleString()}</strong> ${custDelta}</td>
+      <td><strong>$${d.revenue.toLocaleString()}</strong> ${revDelta}
+        <div class="rev-bar"><div class="rev-fill" style="width:${Math.round(d.revenue/maxRev*100)}%"></div></div>
+      </td>
+      <td>${d.clicks.toLocaleString()}</td>
+      <td>$${Math.round(d.revenue/d.customers).toLocaleString()}</td>
+      <td>${getSignal(d)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('count-customers').textContent = data.length + ' partners';
+}
+
+function renderRevenue(data) {
+  const prevById = SNAP_START ? SNAP_START.byId : null;
+  const maxRevTop = Math.max(...data.map(d => d.revenue));
+  document.getElementById('tbody-revenue').innerHTML = data.map((d, i) => {
+    const prev    = prevById ? prevById[d.id] : null;
+    const dRev    = prev ? d.revenue - prev.r : null;
+    const revDelta = dRev !== null ? (dRev >= 0 ? `<span class="delta-positive">▲ $${Math.round(Math.abs(dRev)).toLocaleString()}</span>` : `<span class="delta-negative">▼ $${Math.round(Math.abs(dRev)).toLocaleString()}</span>`) : '';
+    return `<tr>
+      <td><span class="rank-badge ${i < 3 ? 'top3' : ''}">${i+1}</span></td>
+      <td><strong>${d.name}</strong></td>
+      <td><strong>$${d.revenue.toLocaleString()}</strong> ${revDelta}
+        <div class="rev-bar"><div class="rev-fill" style="width:${Math.round(d.revenue/maxRevTop*100)}%"></div></div>
+      </td>
+      <td>${d.customers.toLocaleString()}</td>
+      <td>${d.clicks.toLocaleString()}</td>
+      <td>$${Math.round(d.revenue/d.customers).toLocaleString()}</td>
+      <td>${getType(d)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('count-revenue').textContent = data.length + ' partners';
+}
+
+// ── DATE PICKER LOGIC ─────────────────────────────────────────
+function populateDatePickers(dates) {
+  ['dateFrom','dateTo'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+  });
+  // Default: from = earliest, to = latest
+  document.getElementById('dateFrom').value = dates[0];
+  document.getElementById('dateTo').value   = dates[dates.length - 1];
+  updateModeLabel();
+}
+
+function onDateChange() {
+  updateModeLabel();
+}
+
+function updateModeLabel() {
+  const from  = document.getElementById('dateFrom').value;
+  const to    = document.getElementById('dateTo').value;
+  const badge = document.getElementById('dateModeLabel');
+  if (from === to) {
+    badge.textContent = 'Single snapshot';
+    badge.className   = 'date-mode-badge date-mode-single';
+  } else {
+    badge.textContent = 'Comparing ' + from + ' → ' + to;
+    badge.className   = 'date-mode-badge date-mode-range';
+  }
+  document.getElementById('headerDate').textContent =
+    (from === to ? 'As of ' + to : from + ' → ' + to) +
+    ' · ' + (FULL_DATA?.snapshots[to]?.totals?.partners?.toLocaleString() || '') + ' affiliates';
+}
+
+function applyDateRange() {
+  if (!FULL_DATA) return;
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  const snapEnd   = FULL_DATA.snapshots[to];
+  const snapStart = from !== to ? FULL_DATA.snapshots[from] : null;
+  if (!snapEnd) return;
+  applySnap(snapEnd, snapStart);
+  initCharts(snapEnd);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
 (async function init() {
   try {
     const r = await fetch('./data.json?_=' + Date.now());
-    if (r.ok) applyData(await r.json());
-  } catch(e) { /* use hardcoded fallback */ }
+    if (r.ok) {
+      FULL_DATA = await r.json();
+      const dates   = FULL_DATA.availableDates || [];
+      const latest  = FULL_DATA.latest || dates[dates.length - 1];
+      if (dates.length) populateDatePickers(dates);
+      SNAP_END = FULL_DATA.snapshots[latest];
+      if (SNAP_END) {
+        applySnap(SNAP_END, null);
+        initCharts(SNAP_END);
+        return;
+      }
+    }
+  } catch(e) { /* fallback */ }
   renderCustomers(topCustomers);
   renderRevenue(topRevenue);
   renderWarm(warmLeads);
