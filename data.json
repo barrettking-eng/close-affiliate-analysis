@@ -1,0 +1,274 @@
+{
+  "lastUpdated": "March 11, 2026",
+  "totals": {
+    "partners": 4336,
+    "customers": 6569,
+    "revenue": 2642403.55,
+    "commission": 475571.26,
+    "clicks": 846163,
+    "active": 434,
+    "approved": 4145,
+    "declined": 191
+  },
+  "activity": {
+    "active": 434,
+    "warm": 703,
+    "dormant": 3199
+  },
+  "topCustomers": [
+    {
+      "name": "Sergei platunov",
+      "email": "piternuraket12@gmail.com",
+      "customers": 458,
+      "revenue": 70537.25,
+      "clicks": 17459
+    },
+    {
+      "name": "Victoria Lukianenko",
+      "email": "partnerstack@takeads.com",
+      "customers": 263,
+      "revenue": 122788.73,
+      "clicks": 34520
+    },
+    {
+      "name": "My Teresa",
+      "email": "huyenmi0708@gmail.com",
+      "customers": 245,
+      "revenue": 41591.14,
+      "clicks": 530
+    },
+    {
+      "name": "Hinh Mx",
+      "email": "yeuvothangban1102@gmail.com",
+      "customers": 225,
+      "revenue": 70449.57,
+      "clicks": 412
+    },
+    {
+      "name": "Alex Quigley",
+      "email": "alex@thumbwrite.com",
+      "customers": 207,
+      "revenue": 10642.98,
+      "clicks": 30712
+    },
+    {
+      "name": "Will Weatherly",
+      "email": "will@myreviewscollection.us",
+      "customers": 201,
+      "revenue": 187037.17,
+      "clicks": 3062
+    },
+    {
+      "name": "BloggingX ReachX",
+      "email": "bloggereachx@gmail.com",
+      "customers": 196,
+      "revenue": 16081.48,
+      "clicks": 9859
+    },
+    {
+      "name": "Jastej Choong",
+      "email": "jastej13@gmail.com",
+      "customers": 178,
+      "revenue": 98113.61,
+      "clicks": 774
+    },
+    {
+      "name": "USD Hinh",
+      "email": "hinhmai6789@gmail.com",
+      "customers": 172,
+      "revenue": 21232.59,
+      "clicks": 436
+    },
+    {
+      "name": "Alexander Daskaloff",
+      "email": "notifications@flexoffers.com",
+      "customers": 171,
+      "revenue": 256034.65,
+      "clicks": 116422
+    },
+    {
+      "name": "Richard Hinh",
+      "email": "thaovy191100@gmail.com",
+      "customers": 168,
+      "revenue": 42831.37,
+      "clicks": 302
+    },
+    {
+      "name": "David Heimlich",
+      "email": "dave@vendingvillage.com",
+      "customers": 167,
+      "revenue": 108.0,
+      "clicks": 377
+    },
+    {
+      "name": "M\u00e1t\u00e9 G\u00e9recz",
+      "email": "gereczm@gmail.com",
+      "customers": 145,
+      "revenue": 20736.25,
+      "clicks": 1
+    },
+    {
+      "name": "Mildrid Waddy",
+      "email": "taiwaneseaardwolf@gmail.com",
+      "customers": 126,
+      "revenue": 1945.21,
+      "clicks": 100
+    },
+    {
+      "name": "Leanne Clark",
+      "email": "support@smartaiwriting.com",
+      "customers": 115,
+      "revenue": 15068.36,
+      "clicks": 4950
+    },
+    {
+      "name": "Nga Tr\u1ea7n",
+      "email": "trannga160494@gmail.com",
+      "customers": 109,
+      "revenue": 2082.64,
+      "clicks": 1985
+    },
+    {
+      "name": "Joey Chu",
+      "email": "joeychumarketer@gmail.com",
+      "customers": 100,
+      "revenue": 54809.22,
+      "clicks": 3532
+    },
+    {
+      "name": "Yabku Pathak",
+      "email": "iyabku@gmail.com",
+      "customers": 96,
+      "revenue": 35470.91,
+      "clicks": 5322
+    },
+    {
+      "name": "Thao Nguyen Ngoc",
+      "email": "admin@couponproduct.com",
+      "customers": 86,
+      "revenue": 1380.28,
+      "clicks": 3608
+    },
+    {
+      "name": "Ken Nguyen",
+      "email": "masterlifeincome@gmail.com",
+      "customers": 85,
+      "revenue": 468.17,
+      "clicks": 4
+    }
+  ],
+  "topRevenue": [
+    {
+      "name": "Alexander Daskaloff",
+      "customers": 171,
+      "revenue": 256034.65,
+      "clicks": 116422
+    },
+    {
+      "name": "Will Weatherly",
+      "customers": 201,
+      "revenue": 187037.17,
+      "clicks": 3062
+    },
+    {
+      "name": "Jay scavone",
+      "customers": 22,
+      "revenue": 135922.84,
+      "clicks": 24
+    },
+    {
+      "name": "Victoria Lukianenko",
+      "customers": 263,
+      "revenue": 122788.73,
+      "clicks": 34520
+    },
+    {
+      "name": "Brooks Van Norman",
+      "customers": 12,
+      "revenue": 117513.0,
+      "clicks": 3
+    },
+    {
+      "name": "Mark Miale",
+      "customers": 7,
+      "revenue": 111996.38,
+      "clicks": 4
+    },
+    {
+      "name": "Jastej Choong",
+      "customers": 178,
+      "revenue": 98113.61,
+      "clicks": 774
+    },
+    {
+      "name": "Michael Dallas-Petersen",
+      "customers": 5,
+      "revenue": 95342.08,
+      "clicks": 2579
+    },
+    {
+      "name": "Sergei platunov",
+      "customers": 458,
+      "revenue": 70537.25,
+      "clicks": 17459
+    },
+    {
+      "name": "Hinh Mx",
+      "customers": 225,
+      "revenue": 70449.57,
+      "clicks": 412
+    }
+  ],
+  "warmLeads": [
+    {
+      "name": "Stefania Niciforo",
+      "email": "stefania.niciforo@performyze.com",
+      "clicks": 29533
+    },
+    {
+      "name": "Luis Estrella",
+      "email": "luis@theluisestrella.com",
+      "clicks": 20840
+    },
+    {
+      "name": "Steven Kim",
+      "email": "steven@christianpost.com",
+      "clicks": 19456
+    },
+    {
+      "name": "Matrix Thompson",
+      "email": "info@woahmedia.com",
+      "clicks": 14474
+    },
+    {
+      "name": "Ahmed Awad",
+      "email": "ahmed@pipelinewithahmed.com",
+      "clicks": 7121
+    },
+    {
+      "name": "Douglas Karr",
+      "email": "doug@dknewmedia.com",
+      "clicks": 4526
+    },
+    {
+      "name": "John Moore",
+      "email": "thecollaborator@trustenablement.com",
+      "clicks": 4295
+    },
+    {
+      "name": "Yevhen Derkach",
+      "email": "evgeny@ciframe.com",
+      "clicks": 3814
+    },
+    {
+      "name": "Johnny Rio Fultz",
+      "email": "johnny@rio3consulting.com",
+      "clicks": 3193
+    },
+    {
+      "name": "Bernardo Eir\u00f3",
+      "email": "bernardoeiro@gmail.com",
+      "clicks": 3077
+    }
+  ]
+}
