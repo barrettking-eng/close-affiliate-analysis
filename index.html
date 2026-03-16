@@ -136,11 +136,24 @@
   .pill:not(.active){background:var(--bg);color:var(--gray)}
   .pill:hover:not(.active){background:var(--gray-light)}
 
+  /* RFY SECTION */
+  .rfy-section{background:#fff;border-radius:14px;padding:22px 24px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:20px}
+  .rfy-header{display:flex;align-items:baseline;gap:10px;margin-bottom:16px}
+  .rfy-title{font-size:13px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px}
+  .rfy-subtitle{font-size:12px;color:var(--gray)}
+  .rfy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .rfy-card{border-radius:10px;padding:18px 20px;border-left:4px solid var(--rc,var(--blue));background:var(--bg)}
+  .rfy-metric-label{font-size:12px;font-weight:700;color:var(--rc,var(--blue));text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+  .rfy-metric-desc{font-size:11px;color:var(--gray);margin-bottom:10px}
+  .rfy-metric-value{font-size:28px;font-weight:800;color:var(--navy);line-height:1.1;margin-bottom:4px}
+  .rfy-metric-sub{font-size:12px;color:var(--gray)}
+
   @media(max-width:768px){
     .charts-grid,.segment-wrap{grid-template-columns:1fr}
     .header{padding:14px 16px}
     .main{padding:20px 16px 40px}
     .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .rfy-grid{grid-template-columns:1fr}
   }
 </style>
 </head>
@@ -197,6 +210,34 @@
       <div class="kpi-label">Active Partners</div>
       <div class="kpi-value" id="kpi-active">426</div>
       <div class="kpi-sub" id="kpi-active-sub">9.8% activation rate</div>
+    </div>
+  </div>
+
+  <!-- RFY ANALYSIS -->
+  <div class="rfy-section">
+    <div class="rfy-header">
+      <div class="rfy-title">Reach · Frequency · Yield</div>
+      <div class="rfy-subtitle">Partner cohort performance for selected date range</div>
+    </div>
+    <div class="rfy-grid">
+      <div class="rfy-card" style="--rc:#3b82f6">
+        <div class="rfy-metric-label">Reach</div>
+        <div class="rfy-metric-desc">Total partners in the program</div>
+        <div class="rfy-metric-value" id="rfy-reach">—</div>
+        <div class="rfy-metric-sub" id="rfy-reach-sub"></div>
+      </div>
+      <div class="rfy-card" style="--rc:#10b981">
+        <div class="rfy-metric-label">Frequency</div>
+        <div class="rfy-metric-desc">Partners who closed ≥1 deal</div>
+        <div class="rfy-metric-value" id="rfy-freq">—</div>
+        <div class="rfy-metric-sub" id="rfy-freq-sub"></div>
+      </div>
+      <div class="rfy-card" style="--rc:#8b5cf6">
+        <div class="rfy-metric-label">Yield</div>
+        <div class="rfy-metric-desc">Avg revenue per customer (active partners)</div>
+        <div class="rfy-metric-value" id="rfy-yield">—</div>
+        <div class="rfy-metric-sub" id="rfy-yield-sub"></div>
+      </div>
     </div>
   </div>
 
@@ -753,6 +794,7 @@ function applySnap(snap, prevSnap) {
   renderCustomers(topCustomers);
   renderRevenue(topRevenue);
   renderWarm(warmLeads);
+  updateRFY(snap, prevSnap);
 }
 
 // ── OVERRIDE render functions to show deltas ──
@@ -803,6 +845,36 @@ function renderRevenue(data) {
     </tr>`;
   }).join('');
   document.getElementById('count-revenue').textContent = data.length + ' partners';
+}
+
+// ═══════════════════════════════════════
+//  REACH · FREQUENCY · YIELD
+// ═══════════════════════════════════════
+function updateRFY(snap, prevSnap) {
+  const t  = snap.totals;
+  const pt = prevSnap ? prevSnap.totals : null;
+
+  // Reach = total partners in program
+  const reach = t.partners;
+  document.getElementById('rfy-reach').innerHTML =
+    reach.toLocaleString() + deltaHtml(reach, pt?.partners, '');
+  document.getElementById('rfy-reach-sub').textContent =
+    ((t.active / t.partners) * 100).toFixed(1) + '% conversion rate';
+
+  // Frequency = partners who sold ≥1 deal
+  const freq = t.active;
+  document.getElementById('rfy-freq').innerHTML =
+    freq.toLocaleString() + deltaHtml(freq, pt?.active, '');
+  document.getElementById('rfy-freq-sub').textContent =
+    ((freq / reach) * 100).toFixed(1) + '% of total partners converted';
+
+  // Yield = avg revenue per customer across active partners
+  const yieldVal  = t.customers > 0 ? Math.round(t.revenue / t.customers) : 0;
+  const prevYield = pt && pt.customers > 0 ? Math.round(pt.revenue / pt.customers) : null;
+  document.getElementById('rfy-yield').innerHTML =
+    '$' + yieldVal.toLocaleString() + deltaHtml(yieldVal, prevYield, '');
+  document.getElementById('rfy-yield-sub').textContent =
+    'across ' + t.customers.toLocaleString() + ' total customers';
 }
 
 // ── DATE PICKER LOGIC ─────────────────────────────────────────
